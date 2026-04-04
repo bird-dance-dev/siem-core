@@ -1,3 +1,4 @@
+```mermaid
 graph LR
   subgraph External
     Seed[seed.ts\nデータ投入スクリプト]
@@ -19,3 +20,4 @@ graph LR
   React -- "GET /audit-logs\n検索リクエスト" --> NestJS
   NestJS -- "INSERT / SELECT" --> PG
   NestJS -- "検索結果" --> React
+  ```
