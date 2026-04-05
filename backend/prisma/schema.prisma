@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +8,64 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model Event {
+  id String @id @default(uuid())
+
+  // ---- metadata ----
+  metadata_eventTimestamp   DateTime
+  metadata_eventType        String
+  metadata_logType          String
+  metadata_vendorName       String
+  metadata_productName      String
+  metadata_ingestedTimestamp DateTime @default(now())
+
+  // ---- principal（行為者） ----
+  principal_hostname            String?
+  principal_ip                  String?
+  principal_user_userid         String?
+  principal_user_email          String?
+  principal_process_pid         String?
+  principal_process_commandLine String?
+
+  // ---- target（対象） ----
+  target_hostname      String?
+  target_ip            String?
+  target_user_userid   String?
+  target_user_email    String?
+  target_url           String?
+  target_resourceName  String?
+
+  // ---- リレーション ----
+  securityResults SecurityResult[]
+
+  // ---- インデックス ----
+  @@index([metadata_eventType, metadata_eventTimestamp])
+  @@index([metadata_logType])
+  @@index([principal_user_userid])
+  @@index([principal_ip])
+  @@index([target_ip])
+
+  @@map("events")
+}
+
+model SecurityResult {
+  id      String @id @default(uuid())
+  eventId String
+
+  action      String
+  severity    String?
+  description String?
+  category    String?
+
+  // ---- リレーション ----
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // ---- インデックス ----
+  @@index([eventId])
+  @@index([action])
+  @@index([severity])
+
+  @@map("security_results")
 }
